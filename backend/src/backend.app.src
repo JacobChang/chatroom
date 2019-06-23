@@ -5,7 +5,11 @@
   {mod, { backend_app, []}},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    cowboy,
+    gun,
+    jiffy,
+    jwt
    ]},
   {env,[]},
   {modules, []},

@@ -1,8 +1,15 @@
 import React from "react";
 import { Container } from "../Components/Container";
 import { Link } from "react-router-dom";
+import { webSocket } from "rxjs/webSocket";
 
 export class ChannelPage extends React.Component {
+  componentDidMount() {
+    webSocket("http://hurry.feblr.org/websocket").subscribe(data => {
+      console.log(data);
+    });
+  }
+
   render() {
     return (
       <div className="page page--channel">
