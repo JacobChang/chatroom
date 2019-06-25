@@ -3,16 +3,20 @@
 -export([init/2]).
 
 init(Req0 = #{method := <<"GET">>}, State) ->
+    Channels = channel_registry_server:query(),
     Req = cowboy_req:reply(200,
-			   #{<<"content-type">> => <<"text/plain">>},
-			   <<"Hello world!">>, Req0),
+			   #{<<"content-type">> => <<"application/json">>},
+			   jiffy:encode(Channels), Req0),
     {ok, Req, State};
 init(Req0 = #{method := <<"POST">>}, State) ->
     {ok, Data, Req} = cowboy_req:read_body(Req0),
-    Channel = jiffy:decode(Data),
+    ChannelConfig = jiffy:decode(Data),
+    ChannelId = uuid:get_v4(),
+    {ok, Pid} = channel_sup:start_channel(ChannelId,
+					  ChannelConfig),
     Req = cowboy_req:reply(201,
-			   #{<<"content-type">> => <<"text/plain">>},
-			   <<"Hello world!">>, Req0),
+			   #{<<"content-type">> => <<"application/json">>},
+			   jiffy:encode(#{id => ChannelId}), Req0),
     {ok, Req, State};
 init(Req0, State) ->
     Req = cowboy_req:reply(405,

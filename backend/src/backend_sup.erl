@@ -30,7 +30,6 @@ start_link() ->
 					WebsocketRoute]}]),
     {ok, _} = cowboy:start_clear(http, [{port, 7071}],
 				 #{env => #{dispatch => Dispatch}}),
-    channel_sup:start_link(),
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 %%====================================================================
@@ -38,7 +37,11 @@ start_link() ->
 %%====================================================================
 
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
-init([]) -> {ok, {{one_for_all, 0, 1}, []}}.
+init([]) ->
+    ChildSpec = [{channel_sup,
+		  {channel_sup, start_link, []}, permanent, infinity,
+		  supervisor, [channel_sup]}],
+    {ok, {{one_for_one, 0, 1}, ChildSpec}}.
 
 %%====================================================================
 %% Internal functions
