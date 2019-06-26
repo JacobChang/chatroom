@@ -5,16 +5,17 @@
 -include("channel.hrl").
 
 %% API
--export([start_link/1]).
+-export([start_link/2]).
 
 -export([code_change/3, handle_call/3, handle_cast/2,
 	 handle_info/2, init/1, terminate/2]).
 
 -record(state, {id, config, clients}).
 
-start_link([ChannelId, ChannelConfig]) ->
-    gen_server:start_link({local, ChannelId}, ?MODULE,
-			  [ChannelId, ChannelConfig], []).
+start_link(ChannelId, ChannelConfig) ->
+    Name = uuid:uuid_to_string(ChannelId),
+    gen_server:start_link({local, list_to_atom(Name)},
+			  ?MODULE, [ChannelId, ChannelConfig], []).
 
 init([ChannelId, ChannelConfig]) ->
     channel_registry_server:register(ChannelId,

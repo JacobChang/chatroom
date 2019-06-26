@@ -38,9 +38,48 @@ h3 {
 }
 
 button {
+  padding: 0.5rem 1rem;
   font-size: 1rem;
+
+  color: white;
+  text-align: center;
+
+  background: black;
+}
+
+.form {
+  width: 30rem;
+  max-width: 100%;
 }
 
 .text--center {
   text-align: center;
+}
+
+.form__field {
+  margin: 1rem 0;
+}
+
+.form__field label {
+  display: inline-block;
+  padding: 0.25rem 1rem;
+
+  color: #666;
+  font-size: 0.75rem;
+}
+
+.form__control {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: 1px solid #f0f0f0;
+
+  width: 100%;
+}
+
+.form__submit {
+  margin: 2rem 0;
+}
+
+form button {
+  width: 100%;
 }

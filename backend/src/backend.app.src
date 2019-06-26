@@ -9,7 +9,8 @@
     cowboy,
     gun,
     jiffy,
-    jwt
+    jwt,
+    uuid
    ]},
   {env,[]},
   {modules, []},

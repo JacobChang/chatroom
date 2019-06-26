@@ -1,5 +1,7 @@
 -module(channel_handler).
 
+-include("channel.hrl").
+
 -export([init/2]).
 
 init(Req0 = #{method := <<"GET">>}, State) ->
@@ -10,10 +12,18 @@ init(Req0 = #{method := <<"GET">>}, State) ->
     {ok, Req, State};
 init(Req0 = #{method := <<"POST">>}, State) ->
     {ok, Data, Req} = cowboy_req:read_body(Req0),
-    ChannelConfig = jiffy:decode(Data),
+    ChannelConfig = jiffy:decode(Data, [return_maps]),
+    {ok, Title} = maps:find(<<"title">>, ChannelConfig),
+    {ok, Duration} = maps:find(<<"duration">>,
+			       ChannelConfig),
+    {ok, MaxMembers} = maps:find(<<"max_members">>,
+				 ChannelConfig),
     ChannelId = uuid:get_v4(),
     {ok, Pid} = channel_sup:start_channel(ChannelId,
-					  ChannelConfig),
+					  #channel_config{title = Title,
+							  duration = Duration,
+							  max_members =
+							      MaxMembers}),
     Req = cowboy_req:reply(201,
 			   #{<<"content-type">> => <<"application/json">>},
 			   jiffy:encode(#{id => ChannelId}), Req0),

@@ -6,13 +6,21 @@
 
 init(Req = #{method := <<"GET">>}, State) ->
     Cookies = cowboy_req:parse_cookies(Req),
-    {_, SessionCookie} = lists:keyfind(<<"sessionid">>, 1,
-				       Cookies),
-    {ok, Session} = jwt:decode(SessionCookie,
-			       <<"hurry.feblr.org">>),
-    Req0 = cowboy_req:reply(200,
-			    #{<<"content-type">> => <<"application/json">>},
-			    jiffy:encode(Session), Req),
+    Req0 = case lists:keyfind(<<"sessionid">>, 1, Cookies)
+	       of
+	     false ->
+		 cowboy_req:reply(404,
+				  #{<<"content-type">> =>
+					<<"application/json">>},
+				  "", Req);
+	     {_, SessionCookie} ->
+		 {ok, Session} = jwt:decode(SessionCookie,
+					    <<"hurry.feblr.org">>),
+		 cowboy_req:reply(200,
+				  #{<<"content-type">> =>
+					<<"application/json">>},
+				  jiffy:encode(Session), Req)
+	   end,
     {ok, Req0, State};
 init(Req0, State) ->
     Req = cowboy_req:reply(405, #{<<"allow">> => <<"GET">>},

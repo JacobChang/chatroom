@@ -14,18 +14,17 @@
 -record(state, {channels}).
 
 start_link() ->
-    gen_server:start_link({global, ?SERVER}, ?MODULE, [],
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [],
 			  []).
 
 register(ChannelId, ChannelConfig, Pid) ->
-    gen_server:call({global, ?SERVER},
+    gen_server:call(?SERVER,
 		    {register, ChannelId, ChannelConfig, Pid}).
 
 unregister(ChannelId) ->
-    gen_server:call({global, ?SERVER},
-		    {register, ChannelId}).
+    gen_server:call(?SERVER, {register, ChannelId}).
 
-query() -> gen_server:call({global, ?SERVER}, {query}).
+query() -> gen_server:call(?SERVER, {query}).
 
 init(_Args) -> {ok, #state{channels = #{}}}.
 
