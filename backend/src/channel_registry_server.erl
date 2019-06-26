@@ -5,7 +5,7 @@
 -define(SERVER, ?MODULE).
 
 %% API
--export([query/0, register/3, start_link/1,
+-export([query/0, register/3, start_link/0,
 	 unregister/1]).
 
 -export([code_change/3, handle_call/3, handle_cast/2,
@@ -13,19 +13,19 @@
 
 -record(state, {channels}).
 
-start_link([]) ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [],
+start_link() ->
+    gen_server:start_link({global, ?SERVER}, ?MODULE, [],
 			  []).
 
 register(ChannelId, ChannelConfig, Pid) ->
-    gen_server:call({local, ?SERVER},
+    gen_server:call({global, ?SERVER},
 		    {register, ChannelId, ChannelConfig, Pid}).
 
 unregister(ChannelId) ->
-    gen_server:call({local, ?SERVER},
+    gen_server:call({global, ?SERVER},
 		    {register, ChannelId}).
 
-query() -> gen_server:call({local, ?SERVER}, {query}).
+query() -> gen_server:call({global, ?SERVER}, {query}).
 
 init(_Args) -> {ok, #state{channels = #{}}}.
 

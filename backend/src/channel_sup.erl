@@ -24,7 +24,7 @@ start_channel(ChannelId, ChannelConfig) ->
 			   {{local, ChannelId},
 			    {channel_server, start_link,
 			     [ChannelId, ChannelConfig]},
-			    permenant, 11500, workder, [channel_server]}).
+			    permanent, 11500, workder, [channel_server]}).
 
 start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
@@ -36,7 +36,7 @@ start_link() ->
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
     ChildSpec = [{channel_registry_server,
-		  {channel_registry_server, start_link, []}, permenant,
+		  {channel_registry_server, start_link, []}, permanent,
 		  10500, worker, [channel_registry_server]}],
     {ok, {{one_for_one, 0, 1}, ChildSpec}}.
 
