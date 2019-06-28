@@ -1,7 +1,8 @@
 import React from "react";
 import { Container } from "../Components/Container";
 import { Link } from "react-router-dom";
-import { webSocket } from "rxjs/webSocket";
+import { webSocket, WebSocketSubject } from "rxjs/webSocket";
+import { Subscription } from "rxjs";
 
 interface Props {}
 
@@ -12,10 +13,29 @@ interface State {
 }
 
 export class ChannelPage extends React.Component<Props, State> {
+  subscription?: Subscription;
+
+  websocketUrl(path: string) {
+    return `${window.location.protocol === "http:" ? "ws" : "wss"}://${
+      window.location.host
+    }/${path}`;
+  }
+
   componentDidMount() {
-    webSocket("http://hurry.feblr.org/websocket").subscribe(data => {
+    let webSocketSubject = webSocket(this.websocketUrl("websocket"));
+    this.subscription = webSocketSubject.subscribe(data => {
       console.log(data);
     });
+    webSocketSubject.next({
+      type: "join"
+    });
+  }
+
+  componentWillUnmount() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = undefined;
+    }
   }
 
   render() {

@@ -10,7 +10,7 @@
 -export([code_change/3, handle_call/3, handle_cast/2,
 	 handle_info/2, init/1, terminate/2]).
 
--record(state, {id, config, clients}).
+-record(state, {id, config, clients, tref}).
 
 start_link(ChannelId, ChannelConfig) ->
     Name = uuid:uuid_to_string(ChannelId),
@@ -20,16 +20,19 @@ start_link(ChannelId, ChannelConfig) ->
 init([ChannelId, ChannelConfig]) ->
     channel_registry_server:register(ChannelId,
 				     ChannelConfig, self()),
-    timer:exit_after(ChannelConfig#channel_config.duration,
-		     {expired}),
+    {ok, TRef} =
+	timer:send_after(ChannelConfig#channel_config.duration *
+			   60
+			   * 1000,
+			 {expired}),
     {ok,
      #state{id = ChannelId, config = ChannelConfig,
-	    clients = []}}.
+	    clients = [], tref = TRef}}.
 
 handle_call({join, Pid}, _From, State) ->
     NewState = State#state{clients =
 			       [Pid | State#state.clients]},
-    {reply, ok, State};
+    {reply, ok, NewState};
 handle_call({broadcast, Pid0, Msg}, _From, State) ->
     lists:foreach(fun (Pid) -> Pid ! Msg end,
 		  State#state.clients),
@@ -38,7 +41,7 @@ handle_call({leave, Pid0}, _From, State) ->
     NewState = State#state{clients =
 			       [Pid
 				|| Pid <- State#state.clients, Pid =/= Pid0]},
-    {reply, ok, State};
+    {reply, ok, NewState};
 handle_call(stop, _From, State) ->
     {stop, normal, stopped, State};
 handle_call(_Request, _From, State) ->
@@ -46,6 +49,7 @@ handle_call(_Request, _From, State) ->
 
 handle_cast(_Msg, State) -> {noreply, State}.
 
+handle_info({expired}, State) -> {stop, normal, State};
 handle_info(_Info, State) -> {noreply, State}.
 
 terminate(_Reason, State) ->

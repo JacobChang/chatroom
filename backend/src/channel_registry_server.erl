@@ -22,7 +22,7 @@ register(ChannelId, ChannelConfig, Pid) ->
 		    {register, ChannelId, ChannelConfig, Pid}).
 
 unregister(ChannelId) ->
-    gen_server:call(?SERVER, {register, ChannelId}).
+    gen_server:call(?SERVER, {unregister, ChannelId}).
 
 query() -> gen_server:call(?SERVER, {query}).
 
@@ -38,7 +38,7 @@ handle_call({unregister, ChannelId}, _From, State) ->
 			      State#state.channels),
     {reply, ok, State#state{channels = NewChannels}};
 handle_call({query}, _From, State) ->
-    {reply, #{channels => State#state.channels}, State};
+    {reply, State#state.channels, State};
 handle_call(stop, _From, State) ->
     {stop, normal, stopped, State};
 handle_call(_Request, _From, State) ->
