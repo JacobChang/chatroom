@@ -4,7 +4,7 @@ import classNames from "classnames";
 import { ClassValue } from "classnames/types";
 
 export interface Props {
-  className?: ClassValue[];
+  className?: ClassValue[] | ClassValue;
 }
 
 export class Container extends React.PureComponent<Props> {

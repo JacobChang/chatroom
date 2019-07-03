@@ -1,0 +1,23 @@
+.page__header {
+  position: sticky;
+  top: 0;
+
+  background-color: white;
+}
+
+.page__footer {
+  position: fixed;
+  padding: 0.25rem;
+  bottom: 0;
+  left: 0;
+
+  width: 100%;
+}
+
+.page__footer.flex__box .button {
+  margin-left: 0.25rem;
+}
+
+main {
+  padding-bottom: 3rem;
+}

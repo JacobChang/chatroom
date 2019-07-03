@@ -1,9 +1,10 @@
 import React, { ChangeEvent, FormEvent } from "react";
 import { Container } from "../Components/Container";
-import { Link } from "react-router-dom";
+import { RouteComponentProps, Link } from "react-router-dom";
 import { ajax } from "rxjs/ajax";
+import "./CreatePage.css";
 
-interface Props {}
+interface Props extends RouteComponentProps {}
 
 interface State {
   title: string;
@@ -42,6 +43,9 @@ export class CreatePage extends React.Component<Props, State> {
 
   submit = (event: FormEvent) => {
     event.preventDefault();
+    if (this.state.title === "") {
+      return;
+    }
 
     let params = {
       title: this.state.title,
@@ -53,20 +57,13 @@ export class CreatePage extends React.Component<Props, State> {
         "Content-Type": "application/json"
       })
       .subscribe(result => {
-        console.log(result);
+        this.props.history.replace("/");
       });
   };
 
   render() {
     return (
       <div className="page page--create">
-        <header>
-          <Container className={["flex__box", "flex__box--vc"]}>
-            <h4 className="flex__item">
-              <Link to="/">Back to Home</Link>
-            </h4>
-          </Container>
-        </header>
         <section>
           <Container>
             <form onSubmit={this.submit}>
@@ -81,27 +78,44 @@ export class CreatePage extends React.Component<Props, State> {
                 />
               </div>
               <div className="form__field">
-                <label>Duration(mins)</label>
+                <label>Duration(1min - 60mins)</label>
                 <input
                   className="form__control"
                   type="number"
+                  min="1"
+                  max="60"
                   placeholder="Duration(mins) of channel"
                   value={this.state.duration}
                   onChange={this.updateDuration}
                 />
               </div>
               <div className="form__field">
-                <label>Number of members</label>
+                <label>Number of members(1 - 100)</label>
                 <input
                   className="form__control"
                   type="number"
+                  min="1"
+                  max="100"
                   placeholder="Members of channel"
                   value={this.state.max_members}
                   onChange={this.updateMaxMembers}
                 />
               </div>
               <div className="form__submit">
-                <button type="submit">Create Channel</button>
+                <div className="button__group">
+                  <Link
+                    className="button button--outline button--primary"
+                    to="/"
+                  >
+                    Cancel
+                  </Link>
+                  <button
+                    className="button button--solid button--primary"
+                    type="submit"
+                  >
+                    Create
+                  </button>
+                </div>
               </div>
             </form>
           </Container>

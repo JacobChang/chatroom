@@ -6,11 +6,13 @@ import { Subscription } from "rxjs";
 import { SessionContext } from "../Models/Session";
 import { IChannel } from "../Models/Channel";
 import { Link } from "react-router-dom";
+import { PageStatus } from "../Models/PageStatus";
+import { Channel } from "../Components/Channel";
 
 interface Props {}
 
 interface State {
-  loading: boolean;
+  status: PageStatus;
   channels: IChannel[];
 }
 
@@ -21,45 +23,76 @@ export class HomePage extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      loading: true,
+      status: PageStatus.Idle,
       channels: []
     };
   }
 
   componentDidMount() {
+    this.setState({
+      status: PageStatus.Loading
+    });
+
     ajax("/api/v1/channels").subscribe(
       response => {
         const channels = response.response;
         this.setState({
+          status: PageStatus.Ready,
           channels
         });
       },
       error => {
-        console.log(error);
-      },
-      () => {
         this.setState({
-          loading: false
+          status: PageStatus.Error
         });
       }
     );
   }
 
   render() {
-    const { loading, channels } = this.state;
+    const { status, channels } = this.state;
+
+    let content: any = null;
+    switch (status) {
+      case PageStatus.Idle:
+        content = <p>Loading</p>;
+        break;
+      case PageStatus.Loading:
+        content = <p>Loading</p>;
+        break;
+      case PageStatus.Error:
+        content = <p>Error</p>;
+        break;
+      case PageStatus.Ready:
+        content =
+          channels.length > 0 ? (
+            channels.map(channel => {
+              return <Channel key={channel.id} channel={channel} />;
+            })
+          ) : (
+            <div className="placeholder">No Channel</div>
+          );
+        break;
+    }
 
     return (
       <SessionContext.Consumer>
         {session => {
           return (
             <div className="page page--home">
-              <header>
+              <header className="page__header">
                 <Container className={["flex__box", "flex__box--vc"]}>
-                  <h3 className="flex__item">Hurry</h3>
+                  <h4 className="flex__item">Hurry</h4>
                   {session.verified ? (
-                    <Link to="/channles/create">Create Channel</Link>
+                    <Link
+                      className="button button--primary"
+                      to="/channels/create"
+                    >
+                      Create Channel
+                    </Link>
                   ) : (
                     <a
+                      className="button button--primary"
                       href={`${
                         process.env.REACT_APP_OAUTH_ENDPOINT
                       }?client_id=${
@@ -70,31 +103,13 @@ export class HomePage extends React.Component<Props, State> {
                         process.env.REACT_APP_OAUTH_REDIRECT_URI as string
                       )}&state=stable`}
                     >
-                      Join
+                      Sign In
                     </a>
                   )}
                 </Container>
               </header>
               <section>
-                <Container>
-                  {loading ? (
-                    <p>Loading</p>
-                  ) : (
-                    channels.map(channel => {
-                      return (
-                        <div className="flex__box flex__box--vc">
-                          <div className="flex__item">
-                            <p>{channel.title}</p>
-                            <span>{channel.duration}</span>
-                          </div>
-                          <div>
-                            <Link to={`/channels/${channel.id}`}>Join</Link>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </Container>
+                <Container>{content}</Container>
               </section>
             </div>
           );

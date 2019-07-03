@@ -33,7 +33,7 @@ body {
   flex: 1;
 }
 
-h3 {
+h4 {
   font-size: 1.5rem;
 }
 
@@ -45,6 +45,15 @@ button {
   text-align: center;
 
   background: black;
+}
+
+.page__header {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.page__header h4 {
+  margin: 0;
 }
 
 .form {
@@ -74,12 +83,67 @@ button {
   border: 1px solid #f0f0f0;
 
   width: 100%;
+
+  font-size: 1rem;
 }
 
 .form__submit {
   margin: 2rem 0;
 }
 
-form button {
-  width: 100%;
+.button {
+  padding: 0.5rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+
+  cursor: pointer;
+
+  text-align: center;
+  text-decoration: none;
+
+  border-radius: 0.25rem;
+}
+
+.button--primary.button--solid {
+  color: white;
+
+  background: #000;
+}
+
+.button--primary.button--outline {
+  border-color: #000;
+
+  color: #000;
+
+  background: transparent;
+}
+
+.button__group {
+  display: flex;
+
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.button__group .button {
+  flex: 1;
+
+  margin: 0 0.5rem;
+}
+
+.button__group .button:first-child {
+  margin-left: 0;
+}
+
+.button__group .button:last-child {
+  margin-right: 0;
+}
+
+.placeholder {
+  padding: 5rem 0;
+
+  color: #666;
+  text-align: center;
 }
