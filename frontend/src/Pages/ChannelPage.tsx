@@ -1,13 +1,18 @@
 import React, { ChangeEvent } from "react";
 import { Container } from "../Components/Container";
-import { Link } from "react-router-dom";
+import { Link, RouteComponentProps } from "react-router-dom";
 import { webSocket, WebSocketSubject } from "rxjs/webSocket";
-import { Subscription } from "rxjs";
+import { Subscription, interval } from "rxjs";
 import "./ChannelPage.css";
+import { JoinMsg, Message, ChatMsg } from "../Models/Message";
+import { PageStatus } from "../Models/PageStatus";
+import { Spinner } from "../Components/Spinner";
 
-interface Props {}
+interface Props extends RouteComponentProps<{ id: string }> {}
 
 interface State {
+  title: string;
+  status: PageStatus;
   message: string;
   messages: string[];
 }
@@ -20,6 +25,8 @@ export class ChannelPage extends React.Component<Props, State> {
     super(props);
 
     this.state = {
+      status: PageStatus.Idle,
+      title: "",
       message: "",
       messages: []
     };
@@ -32,10 +39,57 @@ export class ChannelPage extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.webSocketSubject = webSocket(this.websocketUrl("websocket"));
-    this.subscription = this.webSocketSubject.subscribe(data => {
-      console.log(data);
+    this.setState({
+      status: PageStatus.Loading
     });
+    const { match } = this.props;
+    const channelId = match.params.id;
+
+    this.webSocketSubject = webSocket(
+      this.websocketUrl(`websocket?channel_id=${channelId}`)
+    );
+    this.subscription = this.webSocketSubject.subscribe(
+      (data: Message) => {
+        switch (data.type) {
+          case "channel.joined":
+            this.setState({
+              status: PageStatus.Ready,
+              title: data.payload.title
+            });
+            break;
+          case "channel.chat":
+            this.setState({
+              messages: [...this.state.messages, data.payload.content]
+            });
+            break;
+        }
+      },
+      err => {
+        console.log(err);
+      }
+    );
+
+    const pingSubscription = interval(10000).subscribe(() => {
+      if (this.webSocketSubject) {
+        this.webSocketSubject.next({
+          type: "channel.ping",
+          target: {
+            type: "channel",
+            id: channelId
+          }
+        });
+      }
+    });
+    this.subscription.add(pingSubscription);
+
+    let joinMsg: JoinMsg = {
+      type: "channel.join",
+      target: {
+        type: "channel",
+        id: channelId
+      }
+    };
+    this.webSocketSubject.next(joinMsg);
   }
 
   componentWillUnmount() {
@@ -56,12 +110,19 @@ export class ChannelPage extends React.Component<Props, State> {
       return;
     }
 
-    this.webSocketSubject.next({
-      type: "message",
+    const { match } = this.props;
+    let chatMsg: ChatMsg = {
+      type: "channel.chat",
+      target: {
+        type: "channel",
+        id: match.params.id
+      },
       payload: {
-        message: this.state.message
+        content: this.state.message
       }
-    });
+    };
+
+    this.webSocketSubject.next(chatMsg);
 
     this.setState({
       message: "",
@@ -70,11 +131,16 @@ export class ChannelPage extends React.Component<Props, State> {
   };
 
   render() {
+    const { status, title } = this.state;
+    if (status === PageStatus.Idle || status === PageStatus.Loading) {
+      return <Spinner />;
+    }
+
     return (
       <div className="page page--channel">
         <header className="page__header">
           <Container className={["flex__box", "flex__box--vc"]}>
-            <h4 className="flex__item">Title</h4>
+            <h4 className="flex__item">{title}</h4>
             <Link className="button button--primary" to="/">
               Exit
             </Link>

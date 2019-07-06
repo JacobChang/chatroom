@@ -5,7 +5,7 @@
 -export([init/2]).
 
 init(Req0 = #{method := <<"GET">>}, State) ->
-    Channels = channel_registry_server:query(),
+    Channels = channel_registry_server:list(),
     ChannelsList = maps:to_list(Channels),
     Body = lists:map(fun ({ChannelId, {Channel, _Pid}}) ->
 			     #{id =>

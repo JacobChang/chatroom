@@ -18,7 +18,12 @@ export class Channel extends React.PureComponent<Props> {
           <span className="channel__duration">{channel.duration} minutes</span>
         </div>
         <div>
-          <Link to={`/channels/${channel.id}`}>Join</Link>
+          <Link
+            className="button button--primary button--outline"
+            to={`/channels/${channel.id}`}
+          >
+            Join
+          </Link>
         </div>
       </div>
     );
