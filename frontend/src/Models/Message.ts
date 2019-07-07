@@ -31,8 +31,8 @@ export interface JoinMsg {
   }
 }
 
-export interface JoinedMsg {
-  type: 'channel.joined',
+export interface ChannelInfoMsg {
+  type: 'channel.info',
   target: {
     type: TargetType,
     id: string,
@@ -73,7 +73,7 @@ export type Message =
   | PingMsg
   | PongMsg
   | JoinMsg
-  | JoinedMsg
+  | ChannelInfoMsg
   | LeaveMsg
   | LeftMsg
   | ChatMsg

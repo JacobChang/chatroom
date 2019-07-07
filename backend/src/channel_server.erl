@@ -33,12 +33,9 @@ start_link(ChannelId, ChannelConfig) ->
 
 init([ChannelId, ChannelConfig]) ->
     channel_registry_server:register(ChannelId,
-				     ChannelConfig, self()),
-    {ok, TRef} =
-	timer:send_after(ChannelConfig#channel_config.duration *
-			   60
-			   * 1000,
-			 {expired}),
+                     ChannelConfig, self()),
+    Delay = ChannelConfig#channel_config.duration * 60 * 1000,
+    {ok, TRef} = timer:send_after(Delay, {expired}),
     {ok,
      #state{id = ChannelId, config = ChannelConfig,
 	    clients = [], tref = TRef}}.
@@ -62,7 +59,18 @@ handle_call(_Request, _From, State) ->
 
 handle_cast(_Msg, State) -> {noreply, State}.
 
-handle_info({expired}, State) -> {stop, normal, State};
+handle_info({expired}, State) ->
+    Msg = jiffy:encode(#{
+        type => <<"channel.expired">>,
+        target => #{
+            type => <<"channel">>,
+            id => uuid:uuid_to_string(State#state.id, binary_standard)
+        },
+        payload => #{
+        }
+    }),
+    lists:foreach(fun (Pid) -> Pid ! {expired, Msg} end, State#state.clients),
+    {stop, normal, State};
 handle_info(_Info, State) -> {noreply, State}.
 
 terminate(_Reason, State) ->

@@ -4,9 +4,10 @@ import { Link, RouteComponentProps } from "react-router-dom";
 import { webSocket, WebSocketSubject } from "rxjs/webSocket";
 import { Subscription, interval } from "rxjs";
 import "./ChannelPage.css";
-import { JoinMsg, Message, ChatMsg } from "../Models/Message";
+import { JoinMsg, Message, ChatMsg, ErrorMsg } from "../Models/Message";
 import { PageStatus } from "../Models/PageStatus";
 import { Spinner } from "../Components/Spinner";
+import { IToast, Toast } from "../Components/Toast";
 
 interface Props extends RouteComponentProps<{ id: string }> {}
 
@@ -15,6 +16,7 @@ interface State {
   status: PageStatus;
   message: string;
   messages: string[];
+  toast?: IToast;
 }
 
 export class ChannelPage extends React.Component<Props, State> {
@@ -51,7 +53,7 @@ export class ChannelPage extends React.Component<Props, State> {
     this.subscription = this.webSocketSubject.subscribe(
       (data: Message) => {
         switch (data.type) {
-          case "channel.joined":
+          case "channel.info":
             this.setState({
               status: PageStatus.Ready,
               title: data.payload.title
@@ -65,7 +67,16 @@ export class ChannelPage extends React.Component<Props, State> {
         }
       },
       err => {
-        console.log(err);
+        if (err.type === "close") {
+          let reason: ErrorMsg = JSON.parse(err.reason);
+          this.setState({
+            status: PageStatus.Error,
+            toast: {
+              message: reason.payload.code + "",
+              duration: 3000
+            }
+          });
+        }
       }
     );
 
@@ -131,7 +142,7 @@ export class ChannelPage extends React.Component<Props, State> {
   };
 
   render() {
-    const { status, title } = this.state;
+    const { status, title, toast } = this.state;
     if (status === PageStatus.Idle || status === PageStatus.Loading) {
       return <Spinner />;
     }
@@ -172,6 +183,16 @@ export class ChannelPage extends React.Component<Props, State> {
             </button>
           </Container>
         </footer>
+        {toast ? (
+          <Toast
+            toast={toast}
+            onEnd={() => {
+              this.setState({
+                toast: undefined
+              });
+            }}
+          />
+        ) : null}
       </div>
     );
   }

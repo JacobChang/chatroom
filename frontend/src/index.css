@@ -147,3 +147,31 @@ button {
   color: #666;
   text-align: center;
 }
+
+#toasts {
+  position: fixed;
+  top: 0rem;
+  left: 0;
+  padding: 0 1rem;
+
+  width: 100%;
+}
+
+.toast {
+  margin: 1rem 0;
+  padding: 0.5rem;
+
+  border-radius: 0.25rem;
+
+  color: white;
+
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.toast:first-child {
+  margin-top: 4rem;
+}
+
+.toast p {
+  margin: 0;
+}

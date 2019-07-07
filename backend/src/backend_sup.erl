@@ -24,7 +24,7 @@ start_link() ->
     OAuthRoute = {"/api/v1/oauth", oauth_handler, []},
     ChannelRoute = {"/api/v1/channels", channel_handler,
 		    []},
-    WebsocketRoute = {"/websocket", websocket_handler, []},
+    WebsocketRoute = {"/websocket", websocket_handler, [#{}]},
     Dispatch = cowboy_router:compile([{'_',
 				       [SessionRoute, OAuthRoute, ChannelRoute,
 					WebsocketRoute]}]),
