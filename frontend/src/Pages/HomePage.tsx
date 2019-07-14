@@ -8,7 +8,9 @@ import { IChannel } from "../Models/Channel";
 import { Link } from "react-router-dom";
 import { PageStatus } from "../Models/PageStatus";
 import { Channel } from "../Components/Channel";
-import { Toast } from "../Components/Toast";
+import { Spinner } from "../Components/Spinner";
+import { Dialog } from "../Components/Dialog";
+import { DialogBody } from "../Components/DialogBody";
 
 interface Props {}
 
@@ -30,6 +32,10 @@ export class HomePage extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    this.refresh();
+  }
+
+  refresh = () => {
     this.setState({
       status: PageStatus.Loading
     });
@@ -48,7 +54,7 @@ export class HomePage extends React.Component<Props, State> {
         });
       }
     );
-  }
+  };
 
   render() {
     const { status, channels } = this.state;
@@ -56,13 +62,25 @@ export class HomePage extends React.Component<Props, State> {
     let content: any = null;
     switch (status) {
       case PageStatus.Idle:
-        content = <p>Loading</p>;
-        break;
       case PageStatus.Loading:
-        content = <p>Loading</p>;
+        content = (
+          <div className="text--center">
+            <Spinner />
+          </div>
+        );
         break;
       case PageStatus.Error:
-        content = <p>Error</p>;
+        content = (
+          <div className="text--center">
+            <h1 className="placeholder">Oops !</h1>
+            <button
+              onClick={this.refresh}
+              className="button button--primary button--outline"
+            >
+              Refresh Again
+            </button>
+          </div>
+        );
         break;
       case PageStatus.Ready:
         content =

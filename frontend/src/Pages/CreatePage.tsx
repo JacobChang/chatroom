@@ -1,6 +1,7 @@
 import React, { ChangeEvent, FormEvent } from "react";
 import { Container } from "../Components/Container";
 import { RouteComponentProps, Link } from "react-router-dom";
+import { IToast, Toast } from "../Components/Toast";
 import { ajax } from "rxjs/ajax";
 import "./CreatePage.css";
 
@@ -10,6 +11,7 @@ interface State {
   title: string;
   duration: number;
   max_members: number;
+  toast?: IToast;
 }
 
 export class CreatePage extends React.Component<Props, State> {
@@ -44,6 +46,12 @@ export class CreatePage extends React.Component<Props, State> {
   submit = (event: FormEvent) => {
     event.preventDefault();
     if (this.state.title === "") {
+      this.setState({
+        toast: {
+          message: "Please input title",
+          duration: 5000
+        }
+      });
       return;
     }
 
@@ -62,11 +70,35 @@ export class CreatePage extends React.Component<Props, State> {
   };
 
   render() {
+    const { toast } = this.state;
+
     return (
       <div className="page page--create">
-        <section>
+        <header className="page__header">
+          <Container className={["flex__box", "flex__box--vc"]}>
+            <h4 className="flex__item">
+              <Link to="/">Home</Link>
+            </h4>
+          </Container>
+        </header>
+        <Container>
+          <div style={{ position: "relative" }}>
+            {toast ? (
+              <Toast
+                toast={toast}
+                onEnd={() => {
+                  this.setState({
+                    toast: undefined
+                  });
+                }}
+              />
+            ) : null}
+          </div>
+        </Container>
+        <main className="page__content">
           <Container>
             <form onSubmit={this.submit}>
+              <h4 className="form__title text--center">Create Channel</h4>
               <div className="form__field">
                 <label>Title</label>
                 <input
@@ -101,6 +133,13 @@ export class CreatePage extends React.Component<Props, State> {
                   onChange={this.updateMaxMembers}
                 />
               </div>
+              <div className="form__field">
+                <label>Type</label>
+                <select className="form__control">
+                  <option value="private">Private</option>
+                  <option value="public">Public</option>
+                </select>
+              </div>
               <div className="form__submit">
                 <div className="button__group">
                   <Link
@@ -119,7 +158,7 @@ export class CreatePage extends React.Component<Props, State> {
               </div>
             </form>
           </Container>
-        </section>
+        </main>
       </div>
     );
   }

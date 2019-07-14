@@ -12,7 +12,7 @@ export class Channel extends React.PureComponent<Props> {
     const { channel } = this.props;
 
     return (
-      <div className="channel flex__box">
+      <div className="channel flex__box flex__box--vc">
         <div className="flex__item">
           <p className="channel__title">{channel.title}</p>
           <span className="channel__duration">{channel.duration} minutes</span>

@@ -1,6 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
-import "./Spinner.css";
+import "./Toast.css";
 import classNames from "classnames";
 import { ClassValue } from "classnames/types";
 
@@ -60,13 +59,11 @@ export class Toast extends React.PureComponent<Props, State> {
     }
 
     const { toast, className } = this.props;
-    const toastsElem = document.getElementById("toasts");
 
-    return ReactDOM.createPortal(
+    return (
       <div className={classNames("toast", className)}>
         <p>{toast.message}</p>
-      </div>,
-      toastsElem!
+      </div>
     );
   }
 }

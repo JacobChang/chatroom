@@ -8,6 +8,8 @@ import { JoinMsg, Message, ChatMsg, ErrorMsg } from "../Models/Message";
 import { PageStatus } from "../Models/PageStatus";
 import { Spinner } from "../Components/Spinner";
 import { IToast, Toast } from "../Components/Toast";
+import { Dialog } from "../Components/Dialog";
+import { DialogBody } from "../Components/DialogBody";
 
 interface Props extends RouteComponentProps<{ id: string }> {}
 
@@ -17,6 +19,7 @@ interface State {
   message: string;
   messages: string[];
   toast?: IToast;
+  isExpired: boolean;
 }
 
 export class ChannelPage extends React.Component<Props, State> {
@@ -30,7 +33,8 @@ export class ChannelPage extends React.Component<Props, State> {
       status: PageStatus.Idle,
       title: "",
       message: "",
-      messages: []
+      messages: [],
+      isExpired: false
     };
   }
 
@@ -67,12 +71,18 @@ export class ChannelPage extends React.Component<Props, State> {
         }
       },
       err => {
+        console.log(err);
         if (err.type === "close") {
           let reason: ErrorMsg = JSON.parse(err.reason);
           this.setState({
             status: PageStatus.Error,
+            isExpired: true
+          });
+        } else if (err.reason === "error") {
+          this.setState({
+            status: PageStatus.Error,
             toast: {
-              message: reason.payload.code + "",
+              message: "can not connect to channel",
               duration: 3000
             }
           });
@@ -142,7 +152,7 @@ export class ChannelPage extends React.Component<Props, State> {
   };
 
   render() {
-    const { status, title, toast } = this.state;
+    const { status, title, toast, isExpired } = this.state;
     if (status === PageStatus.Idle || status === PageStatus.Loading) {
       return <Spinner />;
     }
@@ -157,6 +167,20 @@ export class ChannelPage extends React.Component<Props, State> {
             </Link>
           </Container>
         </header>
+        <Container>
+          <div style={{ position: "relative" }}>
+            {toast ? (
+              <Toast
+                toast={toast}
+                onEnd={() => {
+                  this.setState({
+                    toast: undefined
+                  });
+                }}
+              />
+            ) : null}
+          </div>
+        </Container>
         <main>
           <Container>
             {this.state.messages.map((message, index) => {
@@ -183,16 +207,14 @@ export class ChannelPage extends React.Component<Props, State> {
             </button>
           </Container>
         </footer>
-        {toast ? (
-          <Toast
-            toast={toast}
-            onEnd={() => {
-              this.setState({
-                toast: undefined
-              });
-            }}
-          />
-        ) : null}
+        <Dialog isShown={isExpired}>
+          <DialogBody>
+            <p>Channel has expired</p>
+            <Link className="button button--primary button--solid" to="/">
+              Back to Home
+            </Link>
+          </DialogBody>
+        </Dialog>
       </div>
     );
   }
