@@ -21,7 +21,7 @@ export class Dialog extends React.PureComponent<Props, State> {
 
     return (
       <div className={classNames("dialog", className)}>
-        {this.props.children}
+        <div className="dialog__main">{this.props.children}</div>
       </div>
     );
   }

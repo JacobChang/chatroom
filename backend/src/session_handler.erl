@@ -14,8 +14,8 @@ init(Req = #{method := <<"GET">>}, State) ->
 					<<"application/json">>},
 				  "", Req);
 	     {_, SessionCookie} ->
-		 {ok, Session} = jwt:decode(SessionCookie,
-					    <<"hurry.feblr.org">>),
+		 {ok, JwtSecret} = maps:find(<<"jwt_secret">>, State),
+		 {ok, Session} = jwt:decode(SessionCookie, JwtSecret),
 		 cowboy_req:reply(200,
 				  #{<<"content-type">> =>
 					<<"application/json">>},

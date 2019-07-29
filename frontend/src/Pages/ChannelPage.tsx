@@ -10,6 +10,7 @@ import { Spinner } from "../Components/Spinner";
 import { IToast, Toast } from "../Components/Toast";
 import { Dialog } from "../Components/Dialog";
 import { DialogBody } from "../Components/DialogBody";
+import { DialogFooter } from "../Components/DialogFooter";
 
 interface Props extends RouteComponentProps<{ id: string }> {}
 
@@ -71,7 +72,6 @@ export class ChannelPage extends React.Component<Props, State> {
         }
       },
       err => {
-        console.log(err);
         if (err.type === "close") {
           let reason: ErrorMsg = JSON.parse(err.reason);
           this.setState({
@@ -210,10 +210,12 @@ export class ChannelPage extends React.Component<Props, State> {
         <Dialog isShown={isExpired}>
           <DialogBody>
             <p>Channel has expired</p>
+          </DialogBody>
+          <DialogFooter className="text--center">
             <Link className="button button--primary button--solid" to="/">
               Back to Home
             </Link>
-          </DialogBody>
+          </DialogFooter>
         </Dialog>
       </div>
     );
